@@ -7,6 +7,9 @@ global grid
 global shifts
 global colour
 global dims
+global corners
+global edges
+
 grid = {
     'G2I' : {
         'row': {
@@ -66,6 +69,32 @@ dims = 6
 centre_left = int(dims/2 - 1 )
 centre_right = int(dims/2)
 
+end_letter = grid['I2G']['row'][str(dims - 1)]
+
+corners = [
+    ('1', 'A'),
+    ('1', end_letter),
+    (str(dims),'A'),
+    (str(dims), end_letter)
+]
+
+edges = []
+for i in [0, dims-1]:
+    for j in range(dims):
+        edge_space = (
+                    grid['I2G']['col'][str(i)],
+                    grid['I2G']['row'][str(j)]
+                    )
+        edges.append(edge_space)
+for j in [0, dims-1]:
+    for i in range(dims):
+        edge_space = (
+                    grid['I2G']['col'][str(i)],
+                    grid['I2G']['row'][str(j)]
+                    )
+        edges.append(edge_space)
+edges = list(set(edges))
+        
 
 # Standard Game Functions
 def makeBoard():
@@ -82,7 +111,10 @@ def makeBoard():
     return board
 
 def dispBoard(board):
-    print('  A B C D E F G H')
+    print('  ', end = '')
+    for i in range(dims):
+        print(grid['I2G']['col'][str(i)], end=' ')
+    print()
     for i in range(dims):
         print(i+1, end= ' ')
         for j in range(dims):
@@ -113,12 +145,13 @@ def pointMove(board, player, opponent, i, j):
     for i_shift in shifts:
         for j_shift in shifts:
             new_i, new_j = i + i_shift, j + j_shift
-            if board[new_i][new_j] == '.':
-                CP = canPlace(board, player, opponent, (new_i, new_j), (i, j))
-                can_move, end_point = CP[0], CP[1]
-                if can_move:
-                    point_moves.append((new_i, new_j))
-                    end_points.append(end_point)
+            if (new_i in range(dims)) and (new_j in range(dims)):
+                if board[new_i][new_j] == '.':
+                    CP = canPlace(board, player, opponent, (new_i, new_j), (i, j))
+                    can_move, end_point = CP[0], CP[1]
+                    if can_move:
+                        point_moves.append((new_i, new_j))
+                        end_points.append(end_point)
     return point_moves, end_points
 
 def canPlace(board, player, opponent, empty_square, opponent_square):
@@ -199,11 +232,21 @@ def decideWinner(board):
             elif board[i][j] == 'w':
                 w += 1
     if b > w:
-        return 'Black'
+        return 'Black', b, w
     elif w > b:
-        return 'White'
+        return 'White', b, w
     elif w == b:
-        return 'Tie'
+        return 'Tie', b, w
+
+def printWinner(winner):
+    os.system('cls||clear')
+    dispBoard(board)
+    winner, b, w = winner[0], winner[1], winner[2]
+    if winner == 'Tie':
+        print('There has been a tie, total points each =  {}'.format(b))
+    else:
+        print('{} has won the game. Black: {}, White: {}'.format(winner, b, w))
+    cont = input('Continue?')
 
 # Two Player Game Fuction
 def playTwoPlayer():
@@ -243,12 +286,8 @@ def playTwoPlayer():
         turn, opponent = opponent, turn
     
     winner = decideWinner(board)
+    printWinner(winner)
 
-    if winner == 'Tie':
-        print('There has been a tie')
-    else:
-        print('{} has won the game'.format(winner))
-    cont = input('Continue?')
 
 # Play v PC function
 def playvPC():
@@ -279,12 +318,10 @@ def playvPC():
             # pass
             move = 'P'
         else:
+            print("{}'s turn:".format(colour[turn]))
+            # Print current board to screen
+            dispBoard(board)
             if player == turn:
-                print("{}'s turn:".format(colour[turn]))
-
-                # Print current board to screen
-                dispBoard(board)
-
                 # Get user input
                 move = getMoveInput(moves)
             else:
@@ -305,17 +342,68 @@ def playvPC():
         turn, opponent = opponent, turn
     
     winner = decideWinner(board)
+    printWinner(winner)
 
-    if winner == 'Tie':
-        print('There has been a tie')
+def computerPlayer(board, computer, real, depth = 5):
+    ''' computerPlayer
+
+    This function attempts to compute an optimal move for the computer to 
+    play, using a minimax search up to a given depth (default = 5).
+    The function aims to achieve the following:
+    - Maximise number of moves for computer
+    - Minimise number of moves for player
+    '''
+    min_max_board = copy.deepcopy(board)
+
+    score, move = minimax(min_max_board, computer, real, True, depth, -999, 999)
+    #print(score)
+    return move
+    
+    
+
+def minimax(board, player, opponent, maximising, depth, alpha, beta):
+    if depth == 0:
+        return scoreBoard(board, player, opponent), ()
+    
+    if maximising:
+        # players turn
+        max_eval = -999
+        moves = generateMoveList(board, player, opponent)
+        for move in moves:
+            old_board = copy.deepcopy(board)
+            makeMove(board, player, opponent, move)
+            next_layer, M = minimax(board, player, opponent, False, depth - 1, alpha, beta)
+            board = old_board
+            if next_layer > max_eval:
+                max_eval = next_layer
+                super_move = move
+            alpha = max(alpha, next_layer)
+            if beta < alpha:
+                break
+        return max_eval, super_move
     else:
-        print('{} has won the game'.format(winner))
-    cont = input('Continue?')
+        min_eval = 999
+        moves = generateMoveList(board, player, opponent)
+        for move in moves:
+            old_board = copy.deepcopy(board)
+            makeMove(board, opponent, player, move)
+            next_layer, M = minimax(board, player, opponent, True, depth - 1, alpha, beta)
+            board = old_board
+            if next_layer < min_eval:
+                min_eval = next_layer
+                super_move = move
+            beta = min(beta, next_layer)
+            if beta < alpha:
+                break
+        return min_eval, super_move
 
-def computerPlayer(board, computer, real_player):
-    moves = generateMoveList(board, computer, real_player)
 
-    return moves[0]
+
+def scoreBoard(board, player, opponent):
+    player_score = len(generateMoveList(board, player, opponent))
+    opponent_score = len(generateMoveList(board, opponent, player))
+    return player_score -  opponent_score
+
 
 # Main Game Function    
 def othello():
@@ -335,5 +423,6 @@ def othello():
         else:
             os.system('cls||clear')
             print('Please choose choose A, B or Q.')
+
 
 othello()
