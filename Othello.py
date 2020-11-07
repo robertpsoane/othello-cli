@@ -250,6 +250,73 @@ def playTwoPlayer():
         print('{} has won the game'.format(winner))
     cont = input('Continue?')
 
+# Play v PC function
+def playvPC():
+
+    # Choose player
+    while True:
+        print('Please choose which side you wish to play on: B/W')
+        choice = input().lower()
+        if choice in ['b','w']:
+            break
+        else:
+            print('Please choose valid choice.')
+            continue
+    
+    player = choice
+    
+    # Make Othello Board
+    board = makeBoard()
+    turn, opponent = 'b', 'w'
+    passed = False
+    while True:
+        os.system('cls||clear')
+
+        # generate move list
+        moves = generateMoveList(board, turn, opponent)
+
+        if len(moves) == 0:
+            # pass
+            move = 'P'
+        else:
+            if player == turn:
+                print("{}'s turn:".format(colour[turn]))
+
+                # Print current board to screen
+                dispBoard(board)
+
+                # Get user input
+                move = getMoveInput(moves)
+            else:
+                move = computerPlayer(board, turn, player)
+
+        if (move == 'P'):
+            if passed == True:
+                break
+            passed = True
+            turn, opponent = opponent, turn
+            continue
+        else:
+            passed = False
+        
+        board = makeMove(board, turn, opponent, move)
+        if turn != player:
+            input('Continue?')
+        turn, opponent = opponent, turn
+    
+    winner = decideWinner(board)
+
+    if winner == 'Tie':
+        print('There has been a tie')
+    else:
+        print('{} has won the game'.format(winner))
+    cont = input('Continue?')
+
+def computerPlayer(board, computer, real_player):
+    moves = generateMoveList(board, computer, real_player)
+
+    return moves[0]
+
 # Main Game Function    
 def othello():
     while True:
@@ -260,8 +327,7 @@ def othello():
         print('Q - Quit Game')
         choice = input().upper()
         if choice == 'A':
-            os.system('cls||clear')
-            print('AI not currently implemented.  Please try again later.')
+            playvPC()
         elif choice == 'B':
             playTwoPlayer()
         elif choice == 'Q':
