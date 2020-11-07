@@ -5,6 +5,8 @@ import os
 # global vars
 global grid
 global shifts
+global colour
+global dims
 grid = {
     'G2I' : {
         'row': {
@@ -59,32 +61,39 @@ colour = {
 
 shifts = [-1, 0, 1]
 
+dims = 6
+
+centre_left = int(dims/2 - 1 )
+centre_right = int(dims/2)
+
+
+# Standard Game Functions
 def makeBoard():
     board = []
-    for i in range(8):
+    for i in range(dims):
         row = []
-        for j in range(8):
+        for j in range(dims):
             row.append('.')
         board.append(row)
-    board[3][3] = 'b'
-    board[4][4] = 'b'
-    board[3][4] = 'w'
-    board[4][3] = 'w'
+    board[centre_left][centre_left] = 'b'
+    board[centre_right][centre_right] = 'b'
+    board[centre_left][centre_right] = 'w'
+    board[centre_right][centre_left] = 'w'
     return board
 
 def dispBoard(board):
     print('  A B C D E F G H')
-    for i in range(8):
+    for i in range(dims):
         print(i+1, end= ' ')
-        for j in range(8):
+        for j in range(dims):
             print(board[i][j], end=' ')
         print()
 
 def generateMoveList(board, player, opponent):
     move_list = []
     end_points = []
-    for i in range(8):
-        for j in range(8):
+    for i in range(dims):
+        for j in range(dims):
             if board[i][j] == opponent:
                 possible_moves = pointMove(board, player, opponent, i, j)
                 moves, end_points_ij = possible_moves[0], possible_moves[1]
@@ -116,7 +125,7 @@ def canPlace(board, player, opponent, empty_square, opponent_square):
     opponent_i, opponent_j = opponent_square[0], opponent_square[1]
     empty_i, empty_j = empty_square[0], empty_square[1]
     step = (opponent_i - empty_i, opponent_j - empty_j)
-    while (empty_i in range(8)) and (empty_j in range(8)):
+    while (empty_i in range(dims)) and (empty_j in range(dims)):
         if board[empty_i][empty_j] == player:
             return (True, (empty_i, empty_j))
         empty_i, empty_j = empty_i + step[0], empty_j + step[1]
@@ -140,7 +149,7 @@ def listTakenPieces(board, player, opponent, move):
             shift = (i_shift, j_shift)
             new_i, new_j = i + i_shift, j + j_shift
             potentially_taken = []
-            while (new_i in range(8)) and (new_i in range(8)):
+            while (new_i in range(dims)) and (new_j in range(dims)):
                 if board[new_i][new_j] == opponent:
                     potentially_taken.append((new_i, new_j))
                     # Carrying on in the shift direction until reach a player
@@ -164,30 +173,10 @@ def takePieces(board, player, opponent, move):
         board[i][j] = player
     return board
 
-def gameIntro():
-    while True:
-        os.system('cls||clear')
-        print('Welcome to Othello.  Please select an option:')
-        print('A - Play against the computer')
-        print('B - Play against a friend')
-        print('Q - Quit Game')
-        choice = input()
-        if (choice == 'A') or (choice == 'a'):
-            os.system('cls||clear')
-            print('AI not currently implemented.  Please try again later.')
-        elif (choice == 'B') or (choice == 'b'):
-            playTwoPlayer()
-            break
-        elif (choice == 'Q') or (choice == 'q'):
-            break
-        else:
-            os.system('cls||clear')
-            print('Please choose choose A, B or Q.')
-
 def getMoveInput(move_list):
     while True:
         print('Please input a move in the following form: A1, or P for pass')
-        move = input()
+        move = input().upper()
         if move == 'P':
             return move
         else:
@@ -197,14 +186,14 @@ def getMoveInput(move_list):
                     return move_tuple
                 else:
                     print('Not a valid move...')
-            except expression as identifier:
+            except:
                 print('Not a valid move...')
 
 def decideWinner(board):
     b = 0
     w = 0
-    for i in range(8):
-        for j in range(8):
+    for i in range(dims):
+        for j in range(dims):
             if board[i][j] == 'b':
                 b += 1
             elif board[i][j] == 'w':
@@ -216,11 +205,13 @@ def decideWinner(board):
     elif w == b:
         return 'Tie'
 
+# Two Player Game Fuction
 def playTwoPlayer():
     
     # Make Othello Board
     board = makeBoard()
     turn, opponent = 'b', 'w'
+    passed = False
     while True:
         os.system('cls||clear')
 
@@ -239,7 +230,7 @@ def playTwoPlayer():
             # Get user input
             move = getMoveInput(moves)
 
-        if move == 'P':
+        if (move == 'P'):
             if passed == True:
                 break
             passed = True
@@ -259,9 +250,24 @@ def playTwoPlayer():
         print('{} has won the game'.format(winner))
     cont = input('Continue?')
 
-    gameIntro()
+# Main Game Function    
+def othello():
+    while True:
+        os.system('cls||clear')
+        print('Welcome to Othello.  Please select an option:')
+        print('A - Play against the computer')
+        print('B - Play against a friend')
+        print('Q - Quit Game')
+        choice = input().upper()
+        if choice == 'A':
+            os.system('cls||clear')
+            print('AI not currently implemented.  Please try again later.')
+        elif choice == 'B':
+            playTwoPlayer()
+        elif choice == 'Q':
+            break
+        else:
+            os.system('cls||clear')
+            print('Please choose choose A, B or Q.')
 
-def main():
-    gameIntro()
-
-main()
+othello()
