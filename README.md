@@ -11,10 +11,7 @@ Text based Othello game with AI
 
 ```
 def scoreBoard(board, player, opponent):
-
     player_score = len(generateMoveList(board, player, opponent))
-    
     opponent_score = len(generateMoveList(board, opponent, player))
-    
     return player_score -  opponent_score
 ```
