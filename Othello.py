@@ -1,5 +1,6 @@
 
 import copy
+import random
 import os
 
 # global vars
@@ -374,6 +375,7 @@ def minimax(board, player, opponent, maximising, depth, alpha, beta):
         # players turn
         max_eval = -999999
         moves = generateMoveList(board, player, opponent)
+        random.shuffle(moves)
         if len(moves) == 0:
             next_layer, M = minimax(board, player, opponent, False, depth - 1, alpha, beta)
         for move in moves:
@@ -404,6 +406,7 @@ def minimax(board, player, opponent, maximising, depth, alpha, beta):
     else:
         min_eval = 999999
         moves = generateMoveList(board, opponent, player)
+        random.shuffle(moves)
         if len(moves) == 0:
             next_layer, M = minimax(board, player, opponent, True, depth - 1, alpha, beta)
         for move in moves:
