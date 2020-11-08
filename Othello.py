@@ -156,10 +156,13 @@ def canPlace(board, player, opponent, empty_square, opponent_square):
     opponent_i, opponent_j = opponent_square[0], opponent_square[1]
     empty_i, empty_j = empty_square[0], empty_square[1]
     step = (opponent_i - empty_i, opponent_j - empty_j)
-    while (empty_i in range(DIMS)) and (empty_j in range(DIMS)):
-        if board[empty_i][empty_j] == player:
-            return (True, (empty_i, empty_j))
-        empty_i, empty_j = empty_i + step[0], empty_j + step[1]
+    test_i, test_j = empty_i + step[0], empty_j + step[1]
+    while (test_i in range(DIMS)) and (test_j in range(DIMS)):
+        if board[test_i][test_j] == '.':
+            break
+        if board[test_i][test_j] == player:
+            return (True, (test_i, test_j))
+        test_i, test_j = test_i + step[0], test_j + step[1]
     return (False, [])
 
 def makeMove(board, player, opponent, move):
@@ -199,6 +202,8 @@ def listTakenPieces(board, player, opponent, move):
 
 def takePieces(board, player, opponent, move):
     taken_list = listTakenPieces(board, player, opponent, move)
+    if taken_list == []:
+        print('broken')
     for piece in taken_list:
         i, j = piece[0], piece[1]
         board[i][j] = player
