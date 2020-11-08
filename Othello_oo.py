@@ -30,8 +30,7 @@ class OthelloBoard:
     def __init__(self, DIMS = 8):
         self.setupConstants(DIMS)
         self.DIMS = DIMS
-        self.makeBoard()
-
+        
     def setupConstants(self, DIMS):
         # Setting up 'global' variables. 
         self.CENTRE_LEFT, self.CENTRE_RIGHT = int(DIMS/2 - 1 ), int(DIMS/2)
@@ -227,27 +226,6 @@ class OthelloBoard:
             print('{} has won the game.\n Black: {}, White: {}'.format(winner, b, w))
         cont = input('Continue?')
 
-    def getPlayerInput(self):
-        while True:
-            os.system('cls||clear')
-            print('Welcome to Othello.  Please select an option:')
-            print('A - Play against computer')
-            print('B - Play against a friend')
-            print('C - Play computer against self')
-            print('Q - Quit Game')
-            choice = input().upper()
-            if choice == 'A':
-                return 'A'
-            elif choice == 'B':
-                return 'B'
-            elif choice == 'C':
-                return 'C'
-            elif choice == 'Q':
-                exit()
-            else:
-                os.system('cls||clear')
-                print('Please choose choose A, B or Q.')
-
     def sideSelect(self):
         # Choose player
         while True:
@@ -276,9 +254,9 @@ class OthelloBoard:
             self.w = AIPlayer('w', self)
             self.b = AIPlayer('b', self)
 
-    def playOthello(self):
-        player_input_choice = self.getPlayerInput()
-        self.actionPlayerChoice(player_input_choice)
+    def playOthello(self, choice):
+        self.makeBoard()
+        self.actionPlayerChoice(choice)
         turn, opponent = 'b', 'w'
         passed = False
 
@@ -320,6 +298,24 @@ class OthelloBoard:
 
         winner = self.decideWinner(self.board)
         self.printWinner(self.board, winner)
+
+    def start(self):
+        while True:
+            os.system('cls||clear')
+            print('Welcome to Othello.  Please select an option:')
+            print('A - Play against computer')
+            print('B - Play against a friend')
+            print('C - Play computer against self')
+            print('Q - Quit Game')
+            choice = input().upper()
+            if choice in ['A','B','C']:
+                self.playOthello(choice)
+            elif choice == 'Q':
+                exit()
+            else:
+                os.system('cls||clear')
+                print('Please choose choose A, B or Q.')
+
 
 class HumanPlayer():
     
@@ -479,4 +475,4 @@ class AIPlayer():
                 n_corners += 1
         return n_corners
 
-OthelloBoard().playOthello()
+OthelloBoard(6).start()
