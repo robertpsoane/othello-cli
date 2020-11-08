@@ -475,4 +475,5 @@ class AIPlayer():
                 n_corners += 1
         return n_corners
 
-OthelloBoard(6).start()
+
+OthelloBoard(8).start()
