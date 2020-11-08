@@ -36,6 +36,7 @@ COLOUR = {
 }
 
 SHIFTS = [-1, 0, 1]
+# Change DIMS between 6 and 8 to change grid
 DIMS = 6
 
 CENTRE_LEFT, CENTRE_RIGHT = int(DIMS/2 - 1 ), int(DIMS/2)
