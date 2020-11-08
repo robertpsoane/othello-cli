@@ -3,136 +3,132 @@ import copy
 import os
 
 # global vars
-global grid
-global shifts
-global colour
-global dims
-global corners
-global edges
+global GRID
+global SHIFTS
+global COLOUR
+global DIMS
+global CORNERS
+global OFF_CORNERS
+global EDGES
+global CORNER_BONUS
+global DEFAULT_DEPTH
+global CENTRE_LEFT
+global CENTRE_RIGHT
+global GRADING_STRATEGY
 
-grid = {
-    'G2I' : {
-        'row': {
-            '1':0,
-            '2':1,
-            '3':2,
-            '4':3,
-            '5':4,
-            '6':5,
-            '7':6,
-            '8':7
-        },
-        'col':{
-            'A':0,
-            'B':1,
-            'C':2,
-            'D':3,
-            'E':4,
-            'F':5,
-            'G':6,
-            'H':7
-        },
-    },
-    'I2G':{
-        'row':{
-            '0':'1',
-            '1':'2',
-            '2':'3',
-            '3':'4',
-            '4':'5',
-            '5':'6',
-            '6':'7',
-            '7':'8'
-        },
-        'col':{
-            '0':'A',
-            '1':'B',
-            '2':'C',
-            '3':'D',
-            '4':'E',
-            '5':'F',
-            '6':'G',
-            '7':'H',
-        }
-    }
-}
+GRID = {
+    'G2I' : {'row': {'1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, 
+                    '8': 7},
+            'col':{'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6,
+                    'H': 7},
+            },
+    'I2G':{'row': {'0': '1', '1': '2', '2': '3', '3': '4', '4': '5',
+                    '5': '6', '6': '7', '7': '8'},
+        'col': {'0': 'A', '1': 'B', '2': 'C', '3': 'D', '4': 'E', '5': 'F',
+                    '6': 'G', '7': 'H', }
+            }
+        } 
 
-colour = {
+COLOUR = {
     'b': 'Black',
     'w': 'White'
 }
 
-shifts = [-1, 0, 1]
+SHIFTS = [-1, 0, 1]
+DIMS = 6
 
-dims = 6
+CENTRE_LEFT, CENTRE_RIGHT = int(DIMS/2 - 1 ), int(DIMS/2)
 
-centre_left = int(dims/2 - 1 )
-centre_right = int(dims/2)
-
-end_letter = grid['I2G']['row'][str(dims - 1)]
-
-corners = [
-    ('1', 'A'),
-    ('1', end_letter),
-    (str(dims),'A'),
-    (str(dims), end_letter)
+CORNERS = [
+    (0, 0),
+    (0, DIMS-1),
+    (DIMS-1,0),
+    (DIMS-1, DIMS-1)
 ]
 
-edges = []
-for i in [0, dims-1]:
-    for j in range(dims):
+OFF_CORNERS = [(1, 0), (0, 1), (1, 1),
+                (0, DIMS-2), (1, DIMS-1), (DIMS-2, DIMS-2),
+                (DIMS-2, 0), (DIMS-1, 1), (DIMS-2, 1),
+                (DIMS-2, DIMS-1), (DIMS-1, DIMS-2), (DIMS-2, DIMS-2)]
+
+EDGES = []
+for i in [0, DIMS-1]:
+    for j in range(DIMS):
         edge_space = (
-                    grid['I2G']['col'][str(i)],
-                    grid['I2G']['row'][str(j)]
+                    GRID['I2G']['col'][str(i)],
+                    GRID['I2G']['row'][str(j)]
                     )
-        edges.append(edge_space)
-for j in [0, dims-1]:
-    for i in range(dims):
+        EDGES.append(edge_space)
+for j in [0, DIMS-1]:
+    for i in range(DIMS):
         edge_space = (
-                    grid['I2G']['col'][str(i)],
-                    grid['I2G']['row'][str(j)]
+                    GRID['I2G']['col'][str(i)],
+                    GRID['I2G']['row'][str(j)]
                     )
-        edges.append(edge_space)
-edges = list(set(edges))
-        
+        EDGES.append(edge_space)
+EDGES = list(set(EDGES))
+    
+CORNER_BONUS = 30
+DEFAULT_DEPTH = 5
+
+def makeGradingStrategy():
+    '''
+    Function to make a grading matrix, inspired by code here
+    https://github.com/yuxuan006/Othello/blob/ac33536bc35c7e50da93aab937e3dfee5c258a7f/yuchai.py#L19
+    '''
+    board = []
+    for i in range(DIMS):
+        row = []
+        for j in range(DIMS):
+            if (i, j) in CORNERS:
+                row.append(10)
+            elif (i, j) in OFF_CORNERS:
+                row.append(-2)
+            elif (i, j) in EDGES:
+                row.append(2)
+            row.append(1)
+        board.append(row)
+    return board
+
+GRADING_STRATEGY = makeGradingStrategy()
 
 # Standard Game Functions
 def makeBoard():
     board = []
-    for i in range(dims):
+    for i in range(DIMS):
         row = []
-        for j in range(dims):
+        for j in range(DIMS):
             row.append('.')
         board.append(row)
-    board[centre_left][centre_left] = 'b'
-    board[centre_right][centre_right] = 'b'
-    board[centre_left][centre_right] = 'w'
-    board[centre_right][centre_left] = 'w'
+    board[CENTRE_LEFT][CENTRE_LEFT] = 'b'
+    board[CENTRE_RIGHT][CENTRE_RIGHT] = 'b'
+    board[CENTRE_LEFT][CENTRE_RIGHT] = 'w'
+    board[CENTRE_RIGHT][CENTRE_LEFT] = 'w'
     return board
 
 def dispBoard(board):
     print('  ', end = '')
-    for i in range(dims):
-        print(grid['I2G']['col'][str(i)], end=' ')
+    for i in range(DIMS):
+        print(GRID['I2G']['col'][str(i)], end=' ')
     print()
-    for i in range(dims):
+    for i in range(DIMS):
         print(i+1, end= ' ')
-        for j in range(dims):
+        for j in range(DIMS):
             print(board[i][j], end=' ')
         print()
 
 def generateMoveList(board, player, opponent):
     move_list = []
     end_points = []
-    for i in range(dims):
-        for j in range(dims):
+    for i in range(DIMS):
+        for j in range(DIMS):
             if board[i][j] == opponent:
                 possible_moves = pointMove(board, player, opponent, i, j)
                 moves, end_points_ij = possible_moves[0], possible_moves[1]
                 for move in moves:
                     grid_move = (
-                        grid['I2G']['row'][str(move[0])],
-                        grid['I2G']['col'][str(move[1])]
+                        GRID['I2G']['row'][str(move[0])],
+                        GRID['I2G']['col'][str(move[1])]
                     )
                     move_list.append(grid_move)
                 for end_point in end_points_ij:
@@ -142,10 +138,10 @@ def generateMoveList(board, player, opponent):
 def pointMove(board, player, opponent, i, j):
     point_moves = []
     end_points = []
-    for i_shift in shifts:
-        for j_shift in shifts:
+    for i_shift in SHIFTS:
+        for j_shift in SHIFTS:
             new_i, new_j = i + i_shift, j + j_shift
-            if (new_i in range(dims)) and (new_j in range(dims)):
+            if (new_i in range(DIMS)) and (new_j in range(DIMS)):
                 if board[new_i][new_j] == '.':
                     CP = canPlace(board, player, opponent, (new_i, new_j), (i, j))
                     can_move, end_point = CP[0], CP[1]
@@ -158,7 +154,7 @@ def canPlace(board, player, opponent, empty_square, opponent_square):
     opponent_i, opponent_j = opponent_square[0], opponent_square[1]
     empty_i, empty_j = empty_square[0], empty_square[1]
     step = (opponent_i - empty_i, opponent_j - empty_j)
-    while (empty_i in range(dims)) and (empty_j in range(dims)):
+    while (empty_i in range(DIMS)) and (empty_j in range(DIMS)):
         if board[empty_i][empty_j] == player:
             return (True, (empty_i, empty_j))
         empty_i, empty_j = empty_i + step[0], empty_j + step[1]
@@ -166,7 +162,7 @@ def canPlace(board, player, opponent, empty_square, opponent_square):
 
 def makeMove(board, player, opponent, move):
     board = copy.deepcopy(board)
-    index_move = (grid['G2I']['row'][move[0]], grid['G2I']['col'][move[1]])
+    index_move = (GRID['G2I']['row'][move[0]], GRID['G2I']['col'][move[1]])
     i, j = index_move[0], index_move[1]
     # Placing players piece
     board[i][j] = player
@@ -177,12 +173,12 @@ def makeMove(board, player, opponent, move):
 def listTakenPieces(board, player, opponent, move):
     i, j = move[0], move[1]
     taken = []
-    for i_shift in shifts:
-        for j_shift in shifts:
+    for i_shift in SHIFTS:
+        for j_shift in SHIFTS:
             shift = (i_shift, j_shift)
             new_i, new_j = i + i_shift, j + j_shift
             potentially_taken = []
-            while (new_i in range(dims)) and (new_j in range(dims)):
+            while (new_i in range(DIMS)) and (new_j in range(DIMS)):
                 if board[new_i][new_j] == opponent:
                     potentially_taken.append((new_i, new_j))
                     # Carrying on in the shift direction until reach a player
@@ -225,8 +221,8 @@ def getMoveInput(move_list):
 def decideWinner(board):
     b = 0
     w = 0
-    for i in range(dims):
-        for j in range(dims):
+    for i in range(DIMS):
+        for j in range(DIMS):
             if board[i][j] == 'b':
                 b += 1
             elif board[i][j] == 'w':
@@ -238,7 +234,7 @@ def decideWinner(board):
     elif w == b:
         return 'Tie', b, w
 
-def printWinner(winner):
+def printWinner(board, winner):
     os.system('cls||clear')
     dispBoard(board)
     winner, b, w = winner[0], winner[1], winner[2]
@@ -265,7 +261,7 @@ def playTwoPlayer():
             # pass
             move = 'P'
         else:
-            print("{}'s turn:".format(colour[turn]))
+            print("{}'s turn:".format(COLOUR[turn]))
 
             # Print current board to screen
             dispBoard(board)
@@ -286,8 +282,7 @@ def playTwoPlayer():
         turn, opponent = opponent, turn
     
     winner = decideWinner(board)
-    printWinner(winner)
-
+    printWinner(board, winner)
 
 # Play v PC function
 def playvPC():
@@ -318,7 +313,7 @@ def playvPC():
             # pass
             move = 'P'
         else:
-            print("{}'s turn:".format(colour[turn]))
+            print("{}'s turn:".format(COLOUR[turn]))
             # Print current board to screen
             dispBoard(board)
             if player == turn:
@@ -327,7 +322,7 @@ def playvPC():
             else:
                 move = computerPlayer(board, turn, player)
 
-        if (move == 'P'):
+        if (move == 'P') or (move == 'pass'):
             if passed == True:
                 break
             passed = True
@@ -342,9 +337,9 @@ def playvPC():
         turn, opponent = opponent, turn
     
     winner = decideWinner(board)
-    printWinner(winner)
+    printWinner(board, winner)
 
-def computerPlayer(board, computer, real, depth = 5):
+def computerPlayer(board, computer, real, depth = DEFAULT_DEPTH):
     ''' computerPlayer
 
     This function attempts to compute an optimal move for the computer to 
@@ -357,52 +352,109 @@ def computerPlayer(board, computer, real, depth = 5):
 
     score, move = minimax(min_max_board, computer, real, True, depth, -999, 999)
     #print(score)
-    return move
+    if move != ():
+        return move
+    else:
+        return 'pass'
     
-    
+def numCorner(board, colour):
+    n_corners = 0
+    for corner in CORNERS:
+        if board[corner[0]][corner[1]] == colour:
+            n_corners += 1
+    return n_corners
 
 def minimax(board, player, opponent, maximising, depth, alpha, beta):
+    super_move = ()
     if depth == 0:
-        return scoreBoard(board, player, opponent), ()
+        return scoreBoard(board, player, opponent), super_move
     
     if maximising:
         # players turn
-        max_eval = -999
+        max_eval = -999999
         moves = generateMoveList(board, player, opponent)
-        for move in moves:
-            old_board = copy.deepcopy(board)
-            makeMove(board, player, opponent, move)
+        if len(moves) == 0:
             next_layer, M = minimax(board, player, opponent, False, depth - 1, alpha, beta)
+        for move in moves:
+            # Copy board
+            old_board = copy.deepcopy(board)
+
+            # Make chosen move
+            board = makeMove(board, player, opponent, move)
+            
+            # Recursively call minimax
+            next_layer, M = minimax(board, player, opponent, False, depth - 1, alpha, beta)
+
+            # Calculate corner addition, subtraction
+            #next_layer += numCorner(board, player) * depth
+            #next_layer -= numCorner(board, opponent) * depth
+
+            # Resetting board
             board = old_board
+            
+            # Updating score based on minimax
             if next_layer > max_eval:
                 max_eval = next_layer
                 super_move = move
             alpha = max(alpha, next_layer)
-            if beta < alpha:
+            if beta <= alpha:
                 break
         return max_eval, super_move
     else:
-        min_eval = 999
-        moves = generateMoveList(board, player, opponent)
-        for move in moves:
-            old_board = copy.deepcopy(board)
-            makeMove(board, opponent, player, move)
+        min_eval = 999999
+        moves = generateMoveList(board, opponent, player)
+        if len(moves) == 0:
             next_layer, M = minimax(board, player, opponent, True, depth - 1, alpha, beta)
+        for move in moves:
+            # Copy board
+            old_board = copy.deepcopy(board)
+
+            # Make chosen move
+            board = makeMove(board, opponent, player, move)
+
+            # Recursively call minimax
+            next_layer, M = minimax(board, player, opponent, True, depth - 1, alpha, beta)
+
+            # Calculate corner addition, subtraction
+            #next_layer -= numCorner(board, player) * depth
+            #next_layer += numCorner(board, opponent) * depth
+
+            # Resetting board
             board = old_board
+
+            # Updating score based on minimax
             if next_layer < min_eval:
                 min_eval = next_layer
                 super_move = move
             beta = min(beta, next_layer)
-            if beta < alpha:
+            if beta <= alpha:
                 break
         return min_eval, super_move
 
 
-
 def scoreBoard(board, player, opponent):
-    player_score = len(generateMoveList(board, player, opponent))
-    opponent_score = len(generateMoveList(board, opponent, player))
-    return player_score -  opponent_score
+    player_score = len(generateMoveList(board, player, opponent))*3
+    opponent_score = len(generateMoveList(board, opponent, player))*3
+
+    if (player_score == 0) and (opponent_score == 0):
+        # Have reached game end
+        winner = decideWinner(board)
+        winner = winner[0]
+        if winner[0].lower() == player:
+            return 300
+        elif winner[0].lower == opponent:
+            return -300
+        else:
+            return 0
+
+    for i in range(DIMS):
+        for j in range(DIMS):
+            if board[i][j] == player:
+                player_score += GRADING_STRATEGY[i][j]
+            if board[i][j] == opponent:
+                opponent_score += GRADING_STRATEGY[i][j]
+
+    return player_score - opponent_score
 
 
 # Main Game Function    
