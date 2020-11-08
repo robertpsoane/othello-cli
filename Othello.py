@@ -86,7 +86,8 @@ def makeGradingStrategy():
                 row.append(-2)
             elif (i, j) in EDGES:
                 row.append(2)
-            row.append(1)
+            else:
+                row.append(1)
         board.append(row)
     return board
 
