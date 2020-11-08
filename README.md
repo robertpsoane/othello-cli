@@ -2,6 +2,8 @@
 
 Text based Othello game with AI
 
+Game can be played in 8x8 and 6x6 mode.  6x6 is faster.  Simply change the line `DIMS = ` (line 40 in the code) between 6 and 8 to change the board size.
+
 Basic Welcome Screen:
 ```
 Welcome to Othello.  Please select an option:
