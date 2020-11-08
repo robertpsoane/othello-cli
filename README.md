@@ -2,11 +2,13 @@
 
 Text based Othello game with AI
 
-Mainly hacked together with the aim of creating a workin minimax player. Could do with refactoring...
+Mainly hacked together with the aim of creating a working minimax player. Could do with refactoring...
 Future improvements that could be made:
 - Refactor code
 - Add different AI difficulty levels
 - Add a GUI
+
+There is an 8x8 CLI based exe for systems without python installed.
 
 Game can be played in 8x8 and 6x6 mode.  6x6 is faster.  Simply change the line `DIMS = ` (line 40 in the code) between 6 and 8 to change the board size.
 
