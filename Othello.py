@@ -241,7 +241,7 @@ def printWinner(board, winner):
     if winner == 'Tie':
         print('There has been a tie, total points each =  {}'.format(b))
     else:
-        print('{} has won the game. Black: {}, White: {}'.format(winner, b, w))
+        print('{} has won the game.\n Black: {}, White: {}'.format(winner, b, w))
     cont = input('Continue?')
 
 # Two Player Game Fuction
@@ -431,7 +431,6 @@ def minimax(board, player, opponent, maximising, depth, alpha, beta):
                 break
         return min_eval, super_move
 
-
 def scoreBoard(board, player, opponent):
     player_score = len(generateMoveList(board, player, opponent))*3
     opponent_score = len(generateMoveList(board, opponent, player))*3
@@ -455,7 +454,6 @@ def scoreBoard(board, player, opponent):
                 opponent_score += GRADING_STRATEGY[i][j]
 
     return player_score - opponent_score
-
 
 # Main Game Function    
 def othello():
