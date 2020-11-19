@@ -1,12 +1,6 @@
-# Othello
+# Othello-cli
 
-Text based Othello game with AI
-
-Mainly hacked together with the aim of creating a working minimax player. Could do with refactoring...
-Future improvements that could be made:
-- Refactor code
-- Add different AI difficulty levels
-- Add a GUI
+Text based Othello game with AI.  This project is finished and has been replaced by my [Othello](https://github.com/robertpsoane/othello) project using pygame.
 
 There is an 8x8 CLI based exe for systems without python installed.
 
