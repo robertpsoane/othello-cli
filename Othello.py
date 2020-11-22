@@ -454,7 +454,7 @@ class AIPlayer():
             winner = winner[0]
             if winner[0].lower() == player:
                 return 300
-            elif winner[0].lower == opponent:
+            elif winner[0].lower.() == opponent:
                 return -300
             else:
                 return 0
